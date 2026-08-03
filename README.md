@@ -16,7 +16,6 @@ REST API з JWT та Swagger/OpenAPI документацію.
 - GraphQL `/graphql/`: каталог + аналітика (GraphiQL).
 - Swagger UI: `/api/docs/`, OpenAPI schema: `/api/schema/`.
 - Перемикач мови інтерфейсу: українська / англійська (UI + каталог).
-- Чек-ліст здачі: [`CHECKLIST.md`](CHECKLIST.md).
 
 ## Вимоги
 
@@ -306,5 +305,3 @@ GraphQL: `/graphql/` (GraphiQL). Приклади:
   userActivity(limit: 5) { email orderCount totalSpent isRepeatBuyer }
 }
 ```
-
-Перед здачею див. також [`CHECKLIST.md`](CHECKLIST.md).

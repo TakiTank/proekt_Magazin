@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% load localization %}
+{% load product_media %}
+{% block title %}{{ ui.my_account }} - Hop & Barley{% endblock %}
+{% block content %}
+<main class="account-page-wrapper">
+    <div class="account-container">
+        <h1>{{ ui.my_account }}</h1>
+
+        <div class="account-tabs">
+            <button class="account-tab{% if active_tab == 'order-history' %} active{% endif %}" data-tab-target="#order-history">{{ ui.purchase_history }}</button>
+            <button class="account-tab{% if active_tab == 'cart' %} active{% endif %}" data-tab-target="#cart">{{ ui.cart }}</button>
+            <button class="account-tab{% if active_tab == 'account-info' %} active{% endif %}" data-tab-target="#account-info">{{ ui.account_information }}</button>
+            <button class="account-tab{% if active_tab == 'password' %} active{% endif %}" data-tab-target="#password">{{ ui.password }}</button>
+        </div>
+
+        <div id="order-history" class="tab-pane{% if active_tab == 'order-history' %} active{% endif %}">
+            <div class="account-actions">
+                <a href="{% url 'home' %}" class="button button--primary">
+                    {{ ui.order_more }}
+                </a>
+            </div>
+
+            <div class="category-tags">
+                <a href="{% url 'users:account' %}" class="category-tag {% if not current_status %}active{% endif %}">{{ ui.all }}</a>
+                {% for value, label in statuses %}
+                <a href="{% querystring status=value page=1 %}" class="category-tag {% if current_status == value %}active{% endif %}">{{ value|order_status_label:site_language }}</a>
+                {% endfor %}
+            </div>
+
+            <div class="order-history-table">
+                <div class="order-table-header">
+                    <div class="order-table-cell">{{ ui.purchase_details }}</div>
+                    <div class="order-table-cell">{{ ui.ordered_products }}</div>
+                    <div class="order-table-cell">{{ ui.purchase_status }}</div>
+                    <div class="order-table-cell">{{ ui.total_amount }}</div>
+                    <div class="order-table-cell">{{ ui.actions }}</div>
+                </div>
+                <div class="order-table-body">
+                    {% for order in orders_page %}
+                    <div class="order-table-row">
+                        <div class="order-table-cell">
+                            <a class="order-id" href="{% url 'orders:detail' order.pk %}">#{{ order.pk }}</a>
+                            <span class="order-date">{{ order.created_at|date:"j M Y" }}</span>
+                        </div>
+                        <div class="order-table-cell">
+                            {% for item in order.items.all %}
+                            <span>{{ item.product|localized_name:site_language }} × {{ item.quantity }}</span>
+                            {% empty %}
+                            <span>{{ ui.no_purchases_yet }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="order-table-cell">
+                            <span class="order-status">{{ order.status|order_status_label:site_language }}</span>
+                        </div>
+                        <div class="order-table-cell">
+                            <span class="order-total">${{ order.total_price }}</span>
+                        </div>
+                        <div class="order-table-cell order-table-cell--actions">
+                            <a href="{% url 'orders:detail' order.pk %}" class="button button--secondary">
+                                {{ ui.view_order }}
+                            </a>
+                            <form method="post" action="{% url 'orders:reorder' order.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="button button--primary">{{ ui.order_more }}</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="empty-note">{{ ui.no_purchases_yet }} <a href="{% url 'home' %}">{{ ui.start_shopping }}</a>.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% if orders_page.has_other_pages %}
+            <div class="account-pagination">
+                {% if orders_page.has_previous %}
+                <a href="{% querystring page=orders_page.previous_page_number %}" class="pagination-link-account">&larr; {{ ui.previous }}</a>
+                {% endif %}
+                {% if orders_page.has_next %}
+                <a href="{% querystring page=orders_page.next_page_number %}" class="pagination-link-account">{{ ui.next }} &rarr;</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div id="cart" class="tab-pane{% if active_tab == 'cart' %} active{% endif %}">
+            <div class="account-form-container">
+                <h2>{{ ui.shopping_cart_title }}</h2>
+                {% include "orders/_cart_contents.html" with show_checkout=True %}
+            </div>
+        </div>
+
+        <div id="account-info" class="tab-pane{% if active_tab == 'account-info' %} active{% endif %}">
+            <div class="account-form-container">
+                <h2>{{ ui.account_information }}</h2>
+                <form id="account-info-form" method="post" action="{% url 'users:account' %}">
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+                    <div class="checkout-form-group">
+                        <label for="{{ form.full_name.id_for_label }}">{{ ui.full_name }}</label>
+                        {{ form.full_name }}
+                        {% if form.full_name.errors %}<div class="form-errors">{{ form.full_name.errors }}</div>{% endif %}
+                    </div>
+                    <div class="checkout-form-group">
+                        <label for="{{ form.phone.id_for_label }}">{{ ui.phone }}</label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}<div class="form-errors">{{ form.phone.errors }}</div>{% endif %}
+                    </div>
+                    <div class="checkout-form-group">
+                        <label for="{{ form.email.id_for_label }}">{{ ui.email }}</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}<div class="form-errors">{{ form.email.errors }}</div>{% endif %}
+                    </div>
+                    <div class="checkout-form-group">
+                        <label for="{{ form.city.id_for_label }}">{{ ui.city }}</label>
+                        {{ form.city }}
+                        {% if form.city.errors %}<div class="form-errors">{{ form.city.errors }}</div>{% endif %}
+                    </div>
+                    <div class="checkout-form-group">
+                        <label for="{{ form.address.id_for_label }}">{{ ui.shipping_address }}</label>
+                        {{ form.address }}
+                        {% if form.address.errors %}<div class="form-errors">{{ form.address.errors }}</div>{% endif %}
+                    </div>
+                    <button type="submit" class="button button--primary button--full-width">{{ ui.save }}</button>
+                </form>
+                <form method="post" action="{% url 'users:logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="button button--secondary button--full-width" id="logout-button">{{ ui.logout }}</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="password" class="tab-pane{% if active_tab == 'password' %} active{% endif %}">
+            <div class="account-form-container">
+                <h2>{{ ui.change_password }}</h2>
+                <form method="post" action="{% url 'users:password_change' %}">
+                    {% csrf_token %}
+                    <div class="checkout-form-group">
+                        <label for="id_old_password">{{ ui.current_password }}</label>
+                        <input type="password" name="old_password" id="id_old_password" class="Input" required>
+                    </div>
+                    <div class="checkout-form-group">
+                        <label for="id_new_password1">{{ ui.new_password }}</label>
+                        <input type="password" name="new_password1" id="id_new_password1" class="Input" required>
+                    </div>
+                    <div class="checkout-form-group">
+                        <label for="id_new_password2">{{ ui.confirm_new_password }}</label>
+                        <input type="password" name="new_password2" id="id_new_password2" class="Input" required>
+                    </div>
+                    <button type="submit" class="button button--primary button--full-width">{{ ui.change_password }}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

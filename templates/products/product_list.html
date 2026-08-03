@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static %}
+{% load product_media %}
+{% block title %}{{ ui.nav_products }} - Hop & Barley{% endblock %}
+{% block content %}
+<main class="catalog">
+  <section class="hero-banner">
+    <img src="{% static 'img/background/hopfen-fields.jpg' %}" alt="{{ ui.hop_fields_alt }}" class="hero-banner__image">
+  </section>
+
+  <div class="catalog-body">
+    <aside class="sidebar">
+      <form id="filter-form" method="get">
+        <input type="hidden" name="q" value="{{ request.GET.q }}">
+        <input type="hidden" name="sort" value="{{ current_sort }}">
+        <h3>{{ ui.product_type }}</h3>
+        <div class="checkbox-group">
+          {% for cat in categories %}
+          <label class="checkbox-container">{{ cat|localized_name:site_language }}
+            <input type="checkbox" name="category" value="{{ cat.slug }}"
+                   {% if cat.slug in selected_categories %}checked{% endif %}>
+            <span class="checkmark"></span>
+          </label>
+          {% endfor %}
+        </div>
+        <h3>{{ ui.price }}</h3>
+        <div class="price-filter">
+          <input type="number" step="0.01" min="0" name="price_min" class="Input"
+                 placeholder="{{ ui.min }}" value="{{ request.GET.price_min }}">
+          <span>—</span>
+          <input type="number" step="0.01" min="0" name="price_max" class="Input"
+                 placeholder="{{ ui.max }}" value="{{ request.GET.price_max }}">
+        </div>
+        <button type="submit" class="button button--secondary">{{ ui.apply_filters }}</button>
+      </form>
+    </aside>
+
+    <div class="catalog-main">
+      <form method="get" class="search-bar">
+        <input name="q" class="search-input" placeholder="{{ ui.search }}" value="{{ request.GET.q }}">
+      </form>
+
+      <div class="sort-options">
+        <a href="{% querystring sort='new' %}" class="sort-button {% if current_sort == 'new' %}active-sort{% endif %}">{{ ui.new }}</a>
+        <a href="{% querystring sort='price_asc' %}" class="sort-button {% if current_sort == 'price_asc' %}active-sort{% endif %}">{{ ui.price_ascending }}</a>
+        <a href="{% querystring sort='price_desc' %}" class="sort-button {% if current_sort == 'price_desc' %}active-sort{% endif %}">{{ ui.price_descending }}</a>
+        <a href="{% querystring sort='rating' %}" class="sort-button {% if current_sort == 'rating' %}active-sort{% endif %}">{{ ui.rating }}</a>
+        <a href="{% querystring sort='popular' %}" class="sort-button {% if current_sort == 'popular' %}active-sort{% endif %}">{{ ui.popular }}</a>
+      </div>
+
+      <div class="product-grid">
+        {% for product in products %}
+        <a href="{{ product.get_absolute_url }}" class="product-card-link">
+          <div class="product-card">
+            <img src="{{ product|product_image_url }}" alt="{{ product|localized_name:site_language }}" class="product-card__image" loading="lazy">
+            <div class="product-card__info">
+              <h4 class="product-card__name">{{ product|localized_name:site_language }}</h4>
+              <p class="product-card__price">${{ product.price }}</p>
+              <p class="product-card__description">{{ product|localized_description:site_language|truncatewords:8 }}</p>
+            </div>
+          </div>
+        </a>
+        {% empty %}
+        <p class="empty-note">{{ ui.no_products_found }}</p>
+        {% endfor %}
+      </div>
+
+      {% if page_obj.has_other_pages %}
+      <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="{% querystring page=page_obj.previous_page_number %}" class="pagination__link">{{ ui.previous }}</a>
+        {% endif %}
+        {% for num in paginator.get_elided_page_range %}
+          {% if num == paginator.ELLIPSIS %}
+          <span class="pagination__dots">…</span>
+          {% else %}
+          <a href="{% querystring page=num %}" class="pagination__link {% if num == page_obj.number %}active{% endif %}">{{ num }}</a>
+          {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <a href="{% querystring page=page_obj.next_page_number %}" class="pagination__link">{{ ui.next }}</a>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</main>
+{% endblock %}

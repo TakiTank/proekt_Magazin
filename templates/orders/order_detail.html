@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load localization %}
+{% load product_media %}
+{% block title %}{{ ui.order_details }} - Hop & Barley{% endblock %}
+{% block content %}
+<main class="static-page-wrapper">
+  <div class="container">
+    <div class="static-page-content order-detail-page">
+      <a href="{% url 'users:account' %}?tab=order-history" class="button button--secondary">
+        {{ ui.back_to_orders }}
+      </a>
+
+      <h1 class="static-page-title">{{ ui.order_details }}</h1>
+      <p class="static-page-subtitle">{{ ui.order_number }}{{ order.pk }}</p>
+
+      <div class="order-detail-grid">
+        <div class="order-detail-panel">
+          <h2>{{ ui.purchase_details }}</h2>
+          <p>{{ ui.order_status_label }}: {{ order.status|order_status_label:site_language }}</p>
+          <p>{{ ui.payment_method }}: {{ order.payment_method|payment_method_label:site_language }}</p>
+          <p>{{ ui.total }}: ${{ order.total_price }}</p>
+        </div>
+        <div class="order-detail-panel">
+          <h2>{{ ui.shipping_information }}</h2>
+          <p>{{ ui.recipient }}: {{ order.full_name }}</p>
+          <p>{{ ui.phone }}: {{ order.phone }}</p>
+          <p>{{ ui.shipping_city }}: {{ order.city }}</p>
+          <p>{{ ui.shipping_address }}: {{ order.address }}</p>
+        </div>
+      </div>
+
+      <div class="order-detail-items">
+        <h2>{{ ui.order_items }}</h2>
+        {% for item in order.items.all %}
+        <div class="order-detail-item">
+          <span>{{ item.product|localized_name:site_language }}</span>
+          <span>{{ ui.quantity }}: {{ item.quantity }}</span>
+          <span>{{ ui.unit_price }}: ${{ item.price }}</span>
+          <strong>{{ ui.line_total }}: ${{ item.total_price }}</strong>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="order-detail-actions">
+        <a href="{% url 'users:account' %}?tab=order-history" class="button button--secondary">
+          {{ ui.back_to_orders }}
+        </a>
+        <form method="post" action="{% url 'orders:reorder' order.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="button button--primary">{{ ui.order_more }}</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

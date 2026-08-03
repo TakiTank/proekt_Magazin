@@ -1,0 +1,45 @@
+{% extends "admin/change_list.html" %}
+
+{% block content %}
+{% if analytics %}
+<div class="module" style="margin-bottom: 16px;">
+  <h2>{{ analytics_title|default:"Analytics" }}</h2>
+  <div style="display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+    {% for item in analytics %}
+    <div style="padding: 12px; border: 1px solid #d8d8d8; border-radius: 6px; background: #fff;">
+      <div style="font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 0;">{{ item.label }}</div>
+      <div style="font-size: 24px; font-weight: 600;">{{ item.value }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if top_products %}
+<div class="module" style="margin-bottom: 16px;">
+  <h2>{{ top_products_title|default:"Top products" }}</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Sold units</th>
+        <th>Orders</th>
+        <th>Revenue</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for product in top_products %}
+      <tr>
+        <td>{{ product.name }}</td>
+        <td>{{ product.sold_units }}</td>
+        <td>{{ product.orders_count }}</td>
+        <td>${{ product.revenue }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{{ block.super }}
+{% endblock %}

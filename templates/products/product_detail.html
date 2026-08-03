@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load static %}
+{% load product_media %}
+{% block title %}{{ product|localized_name:site_language }} - Hop & Barley{% endblock %}
+{% block content %}
+<main class="page-product">
+    <div class="container">
+        <section class="product-details-section">
+            <div class="product-image-container">
+                <img src="{{ product|product_image_url }}" alt="{{ product|localized_name:site_language }}" class="product-image">
+            </div>
+            <div class="product-info-column">
+                <div class="product-title-price">
+                    <h1 class="product-name">{{ product|localized_name:site_language }}</h1>
+                    <div class="price-section">
+                        <span class="price-tag">{{ ui.per_unit }}</span>
+                        <p class="product-price">${{ product.price }}</p>
+                    </div>
+                </div>
+                <div class="product-description">
+                    {{ product|localized_description:site_language|linebreaks }}
+                </div>
+                <form class="cart-controls" method="post" action="{% url 'orders:cart_add' product.pk %}">
+                    {% csrf_token %}
+                    {% if product.in_stock %}
+                    <div class="quantity-counter" id="quantity-counter">
+                        <button type="button" class="quantity-btn" data-action="decrease" aria-label="{{ ui.decrease_quantity }}"><i class="fa-solid fa-minus"></i></button>
+                        <span class="quantity-value">1</span>
+                        <input type="hidden" name="quantity" value="1" max="{{ product.stock }}">
+                        <button type="button" class="quantity-btn" data-action="increase" aria-label="{{ ui.increase_quantity }}"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                    <button type="submit" class="button button--primary add-to-cart-button" id="add-to-cart-btn">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span>{{ ui.add_to_cart }}</span>
+                    </button>
+                    <span class="stock-badge">{{ product.stock }} {{ ui.in_stock }}{% if in_cart %} · {{ in_cart }} {{ ui.in_cart }}{% endif %}</span>
+                    {% else %}
+                    <span class="stock-badge stock-badge--out">{{ ui.out_of_stock }}</span>
+                    {% endif %}
+                </form>
+            </div>
+        </section>
+
+        <section class="accordion-section">
+            <div class="accordion-item">
+                <div class="accordion-title">
+                    <h3>{{ ui.technical_specifications }}</h3>
+                    <i class="fa-solid fa-chevron-down accordion-icon"></i>
+                </div>
+                <div class="accordion-content">
+                    <ul>
+                        <li><strong>{{ ui.product_category }}:</strong> {{ product.category|localized_name:site_language }}</li>
+                        <li><strong>{{ ui.product_availability }}:</strong> {{ product.stock }} {{ ui.in_stock }}</li>
+                        <li><strong>{{ ui.sku }}:</strong> HB-{{ product.pk|stringformat:"04d" }}</li>
+                        <li><strong>{{ ui.added }}:</strong> {{ product.created_at|date:"j M Y" }}</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="reviews-section">
+            <h2>{{ ui.latest_reviews }}</h2>
+            <div class="reviews-grid">
+                {% for review in reviews %}
+                <div class="review-card">
+                    <div class="review-rating" aria-label="{{ review.rating }} / 5">
+                        {% for i in "12345" %}
+                        <i class="{% if forloop.counter <= review.rating %}fa-solid{% else %}fa-regular{% endif %} fa-star"></i>
+                        {% endfor %}
+                    </div>
+                    <div class="review-body">
+                        <p class="review-text">{{ review|localized_comment:site_language }}</p>
+                    </div>
+                    <div class="review-author">
+                        <img src="{% static 'img/avatars/' %}avatar{{ review.user.avatar_index }}.svg" alt="{{ ui.user_avatar_alt }}" class="author-avatar">
+                        <span class="author-name">{{ review.user.first_name|default:review.user.email }}</span>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="empty-note">{{ ui.no_reviews }}</p>
+                {% endfor %}
+            </div>
+
+            {% if can_review %}
+            <form class="review-form" method="post">
+                {% csrf_token %}
+                <h3>{{ ui.leave_review }}</h3>
+                {% if form.errors %}<div class="form-errors">{{ form.errors }}</div>{% endif %}
+                <div class="checkout-form-group">
+                    <label>{{ ui.review_rating }}</label>
+                    <div class="review-stars" role="radiogroup" aria-label="{{ ui.review_rating }}">
+                        {% for radio in form.rating %}
+                        <label class="review-star-option">
+                            {{ radio.tag }}
+                            <span class="review-star-face" aria-hidden="true">
+                                <i class="fa-solid fa-star"></i>
+                            </span>
+                            <span class="visually-hidden">{{ radio.choice_label }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="checkout-form-group"><label>{{ ui.review_comment }}</label>{{ form.comment }}</div>
+                <button type="submit" class="button button--primary">{{ ui.submit_review }}</button>
+            </form>
+            {% elif review_state == "guest" %}
+            <p class="review-hint">
+                {{ ui.review_sign_in }}
+                <a href="{% url 'users:login' %}?next={{ request.path }}">{{ ui.sign_in }}</a>
+            </p>
+            {% elif review_state == "not_purchased" %}
+            <p class="review-hint">{{ ui.review_buy_first }}</p>
+            {% elif review_state == "already_reviewed" %}
+            <p class="review-hint">{{ ui.review_already_left }}</p>
+            {% endif %}
+        </section>
+    </div>
+</main>
+{% endblock %}

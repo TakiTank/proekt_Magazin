@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load localization %}
+{% load product_media %}
+{% block title %}{{ ui.order_details }} - Hop & Barley{% endblock %}
+{% block content %}
+<main class="checkout-page-wrapper">
+    <div class="checkout-container">
+        <h1>{{ ui.order_details }}</h1>
+        <a href="{% url 'orders:cart' %}" class="button button--secondary checkout-back-link">
+            {{ ui.back_to_cart }}
+        </a>
+        <form id="checkout-form" method="post">
+            {% csrf_token %}
+            <section>
+                <h2 class="checkout-section-title">{{ ui.shipping_information }}</h2>
+                {% if form.non_field_errors %}
+                <div class="form-errors">{{ form.non_field_errors }}</div>
+                {% endif %}
+                <div class="checkout-form-group">
+                    <label for="{{ form.full_name.id_for_label }}">{{ ui.full_name }}</label>
+                    {{ form.full_name }}
+                    {% if form.full_name.errors %}<div class="form-errors">{{ form.full_name.errors }}</div>{% endif %}
+                </div>
+                <div class="checkout-form-group">
+                    <label for="{{ form.phone.id_for_label }}">{{ ui.phone }}</label>
+                    {{ form.phone }}
+                    {% if form.phone.errors %}<div class="form-errors">{{ form.phone.errors }}</div>{% endif %}
+                </div>
+                <div class="checkout-form-group">
+                    <label for="{{ form.city.id_for_label }}">{{ ui.city }}</label>
+                    {{ form.city }}
+                    {% if form.city.errors %}<div class="form-errors">{{ form.city.errors }}</div>{% endif %}
+                </div>
+                <div class="checkout-form-group">
+                    <label for="{{ form.address.id_for_label }}">{{ ui.shipping_address }}</label>
+                    {{ form.address }}
+                    {% if form.address.errors %}<div class="form-errors">{{ form.address.errors }}</div>{% endif %}
+                </div>
+            </section>
+
+            <section>
+                <h2 class="checkout-section-title">{{ ui.payment_method }}</h2>
+                <div class="payment-options">
+                    {% for value, label in form.fields.payment_method.choices %}
+                    <label class="radio-option">
+                        <input type="radio" name="payment_method" value="{{ value }}"
+                               {% if form.payment_method.value|default:'debit' == value %}checked{% endif %}>
+                        <span class="radio-custom"></span>
+                        <span class="radio-label">{{ value|payment_method_label:site_language }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="checkout-summary">
+                <h2 class="checkout-section-title">{{ ui.order_summary }}</h2>
+                {% for item in cart %}
+                <div class="summary-line">
+                    <span>{{ item.product|localized_name:site_language }} × {{ item.quantity }}</span>
+                    <span>${{ item.total_price }}</span>
+                </div>
+                {% endfor %}
+                <div class="summary-total">
+                    <p>{{ ui.total }}</p>
+                    <p>${{ cart.total_price }}</p>
+                </div>
+                <button type="submit" class="button button--primary button--pay">{{ ui.pay }}</button>
+            </section>
+        </form>
+    </div>
+</main>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ ui.shopping_cart_title }} - Hop & Barley{% endblock %}
+{% block content %}
+<main class="cart-page-wrapper">
+    <div class="cart-container">
+        <h1>{{ ui.shopping_cart_title }}</h1>
+        {% include "orders/_cart_contents.html" with show_checkout=True %}
+    </div>
+</main>
+{% endblock %}

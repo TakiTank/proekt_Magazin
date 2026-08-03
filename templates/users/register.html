@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ ui.register }} - Hop & Barley{% endblock %}
+{% block content %}
+<main class="auth-page-wrapper">
+  <div class="auth-background">
+    <img src="{% static 'img/background/pattern.jpg' %}" alt="{{ ui.background_pattern_alt }}">
+  </div>
+  <div class="auth-form-container">
+    <div class="auth-container auth-container--register">
+      <div class="Legend">
+        <h1 class="auth-title">{{ ui.register }}</h1>
+      </div>
+
+      <form class="auth-form" id="register-form" method="post">
+        {% csrf_token %}
+        <div class="InputField">
+          <label for="{{ form.email.id_for_label }}">{{ ui.email }}</label>
+          {{ form.email }}
+          {% if form.email.errors %}<div class="form-errors">{{ form.email.errors }}</div>{% endif %}
+        </div>
+        <div class="InputField">
+          <label for="{{ form.password.id_for_label }}">{{ ui.password }}</label>
+          {{ form.password }}
+          {% if form.password.errors %}<div class="form-errors">{{ form.password.errors }}</div>{% endif %}
+        </div>
+
+        <div class="CheckboxField">
+          <label class="checkbox-container">{{ ui.remember_me }}
+            <input type="checkbox" name="remember_me" checked>
+            <span class="checkmark"></span>
+          </label>
+        </div>
+
+        <div class="ButtonGroup">
+          <button type="submit" class="button button--primary">{{ ui.register }}</button>
+        </div>
+      </form>
+
+      <p class="auth-switch">{{ ui.already_have_account }} <a href="{% url 'users:login' %}">{{ ui.sign_in }}</a></p>
+    </div>
+  </div>
+</main>
+{% endblock %}

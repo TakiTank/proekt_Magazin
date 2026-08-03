@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ ui.sign_in }} - Hop & Barley{% endblock %}
+{% block content %}
+<main class="auth-page-wrapper">
+  <div class="auth-background">
+    <img src="{% static 'img/background/pattern.jpg' %}" alt="{{ ui.background_pattern_alt }}">
+  </div>
+  <div class="auth-form-container">
+    <div class="auth-container auth-container--login">
+      <div class="Legend">
+        <h1 class="auth-title">{{ ui.sign_in }}</h1>
+      </div>
+
+      <form class="auth-form" id="login-form" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        {% if form.non_field_errors %}
+        <div class="form-errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+        <div class="InputField">
+          <label for="{{ form.username.id_for_label }}">{{ ui.email }}</label>
+          {{ form.username }}
+        </div>
+        <div class="InputField">
+          <label for="{{ form.password.id_for_label }}">{{ ui.password }}</label>
+          {{ form.password }}
+        </div>
+
+        <div class="ButtonGroup">
+          <button type="submit" class="button button--primary">{{ ui.sign_in }}</button>
+        </div>
+
+        <div class="TextLink">
+          <a href="{% url 'users:password_reset' %}">{{ ui.forgot_password }}</a>
+        </div>
+      </form>
+
+      <p class="auth-switch">{{ ui.dont_have_account }} <a href="{% url 'users:register' %}">{{ ui.sign_up }}</a></p>
+    </div>
+  </div>
+</main>
+{% endblock %}

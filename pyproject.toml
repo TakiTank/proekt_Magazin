@@ -1,0 +1,18 @@
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings_test"
+python_files = ["test_*.py"]
+testpaths = ["tests"]
+
+[tool.mypy]
+plugins = ["mypy_django_plugin.main"]
+check_untyped_defs = true
+warn_unused_ignores = true
+ignore_missing_imports = true
+exclude = ["migrations/"]
+
+[[tool.mypy.overrides]]
+module = "*.migrations.*"
+ignore_errors = true
+
+[tool.django-stubs]
+django_settings_module = "config.settings"

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load localization %}
+{% block title %}{{ ui.thank_you }} - Hop & Barley{% endblock %}
+{% block content %}
+<main class="static-page-wrapper">
+  <div class="container">
+    <div class="static-page-content">
+      <h1 class="static-page-title">{{ ui.thank_you }}</h1>
+      <p class="static-page-subtitle">{{ ui.order_number }}{{ order.pk }} {{ ui.order_placed }}</p>
+      <div class="static-page-text">
+        <p>{{ ui.order_status_label }}: {{ order.status|order_status_label:site_language }} · {{ ui.total }}: ${{ order.total_price }}</p>
+        <p>{{ ui.confirmation_email }} {{ order.user.email }}.</p>
+      </div>
+      <a href="{% url 'orders:detail' order.pk %}" class="button button--secondary">{{ ui.order_details }}</a>
+      <a href="{% url 'users:account' %}?tab=order-history" class="button button--secondary">{{ ui.back_to_orders }}</a>
+      <a href="{% url 'home' %}" class="button button--primary">{{ ui.order_more }}</a>
+    </div>
+  </div>
+</main>
+{% endblock %}
